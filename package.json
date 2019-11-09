@@ -1,0 +1,15 @@
+{
+  "name": "postoffice",
+  "version": "1.0.0",
+  "description": "PostOffice is Private Suite's official SMTP/IMAP server",
+  "main": "src/index.js",
+  "author": "Private Suite Media, LLC",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "js-sha512": "^0.8.0",
+    "mailparser": "^2.7.6",
+    "smtp-server": "^3.5.0",
+    "streamlet": "privatesuite/streamlet"
+  }
+}
