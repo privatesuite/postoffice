@@ -65,9 +65,29 @@ function (db) {
 
 		},
 
-		createEmail (sender, recipient) {
+		/**
+		 * Add an email to the database.
+		 * 
+		 * @param {{from: string, to: string[]}} envelope The email's envelope
+		 * @param {*} raw The email's raw MIME-formatted data
+		 * @param {*} mailboxes The mailboxes the email is in
+		 * @param {*} tags The email's tags
+		 */
+		createEmail (envelope, raw, mailboxes, tags) {
 
 			
+
+		},
+
+		addEmailToMailbox () {
+			
+			
+
+		},
+
+		removeEmailFromMailbox () {
+
+
 
 		}
 

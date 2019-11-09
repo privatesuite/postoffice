@@ -1,6 +1,10 @@
 const db = require("./db");
+const args = require("minimist")(process.argv.slice(2));
+const smtp = require("./smtp");
 
 (async () => {
+
+	if (args.dev) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 
 	await db.db.init();
 

@@ -58,7 +58,7 @@ function (db) {
 		/**
 		 * Get all users.
 		 */
-		all () {
+		allUsers () {
 
 			return db.find(_ => _.type === "user");
 
@@ -82,7 +82,19 @@ function (db) {
 		 */
 		getUserByUsername (username) {
 
-			return this.all().find(_ => _.username === username);
+			return this.allUsers().find(_ => _.username === username);
+
+		},
+
+		/**
+		 * Login a user with a username and unhashed password.
+		 * 
+		 * @param {string} username The user's username
+		 * @param {string} password The user's unhashed password
+		 */
+		login (username, password) {
+
+			return this.allUsers().find(_ => _.username === username && _.password === this.hashPassword(password));
 
 		}
 

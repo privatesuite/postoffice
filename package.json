@@ -7,8 +7,11 @@
   "license": "MIT",
   "private": false,
   "dependencies": {
+    "ini": "^1.3.5",
+    "is-port-reachable": "^2.0.1",
     "js-sha512": "^0.8.0",
     "mailparser": "^2.7.6",
+    "minimist": "^1.2.0",
     "smtp-server": "^3.5.0",
     "streamlet": "privatesuite/streamlet"
   }
