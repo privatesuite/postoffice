@@ -60,6 +60,8 @@ class PostOfficeSMTP {
 			
 			onRcptTo (address, session, callback) {
 				
+				console.log(`(smtp/info) Added recipient to "${address.address}"`);
+
 				if (address.address.endsWith(`@${options.server.host}`)) {
 					
 					if (!db.users.getUserByUsername(address.address.replace(`@${options.server.host}`, ""))) {
@@ -81,6 +83,8 @@ class PostOfficeSMTP {
 			
 			onMailFrom (address, session, callback) {
 				
+				console.log(`(smtp/info) Set email from to "${address.address}"`);
+
 				if (address.address.endsWith(`@${options.server.host}`)) {
 					
 					if (!session.user) callback(new Error("Authentication required"));
