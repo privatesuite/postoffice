@@ -73,7 +73,7 @@ class PostOfficeSMTP {
 						
 					}
 					
-				} else callback(null);
+				} else callback(new Error("Invalid recipient"));
 				
 			},
 			
@@ -93,7 +93,7 @@ class PostOfficeSMTP {
 			onData (stream, session, callback) {
 				
 				if (session.envelope.mailFrom.address.endsWith(`@${options.server.host}`) && !session.user) return callback(new Error("Authentication required"));
-				if (`${session.user}@${options.server.host}` !== session.envelope.mailFrom.address) return callback(new Error("Invalid sender"));
+				if (session.user && `${session.user}@${options.server.host}` !== session.envelope.mailFrom.address) return callback(new Error("Invalid sender"));
 
 				const emailChunks = [];
 				stream.on("data", chunk => {

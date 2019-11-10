@@ -9,7 +9,7 @@ const config = require("./utils/config");
 	if (args.dev) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 
 	await db.db.init();
-	config.loadConfig(path.join(__dirname, "..", "config", args.config || "dev" + ".conf"))
+	config.loadConfig(path.join(__dirname, "..", "config", (args.config || "dev") + ".conf"))
 
 	if (!db.users.getUserByUsername("admin")) {
 

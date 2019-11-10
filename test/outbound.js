@@ -6,7 +6,7 @@ const nodemailer = require("nodemailer");
 
 	const transport = nodemailer.createTransport({
 	
-		host: "localhost",
+		host: "snitchbcc.com",
 		port: 587,
 		auth: {
 
@@ -19,7 +19,7 @@ const nodemailer = require("nodemailer");
 
 	await transport.sendMail({
 
-		from: "admin@localhost",
+		from: "admin@snitchbcc.com",
 		to: "aurame@privatesuitemag.com",
 		subject: "Testing",
 		text: "hello world!"
