@@ -48,7 +48,7 @@ const nodemailer = require("nodemailer");
 	await transport.sendMail({
 
 		from: "admin@snitchbcc.com",
-		to: "aurame@privatesuitemag.com",
+		to: "aurame@privatesuitemag.com, coolcorpstudios@gmail.com",
 		subject: "Testing",
 		text: "hello world!"
 

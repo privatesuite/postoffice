@@ -96,32 +96,47 @@ class PostOfficeSMTP {
 				if (session.envelope.mailFrom.address.endsWith(`@${options.server.host}`) && !session.user) return callback(new Error("Authentication required"));
 				if (session.user && `${session.user}@${options.server.host}` !== session.envelope.mailFrom.address) return callback(new Error("Invalid sender"));
 
-				const emailChunks = [];
-				stream.on("data", chunk => {
-			
-					emailChunks.push(chunk);
-			
+				const emailPath = path.join(__dirname, "..", "..", "mail", `${Math.random().toString(36).replace("0.", "")}}.eml`);
+
+				db.emails.createEmail(session.envelope, emailPath, db.emails.getMailboxesFromEnvelope(session.envelope), {
+
+					remoteAddress: session.remoteAddress,
+					clientHostname: session.clientHostname
+
 				});
+				await _this.sendEmail({
+
+					to: session.envelope.rcptTo.map(_ => _.address),
+					from: session.envelope.mailFrom.address
+
+				}, emailPath);
+
+				// const emailChunks = [];
+				// stream.on("data", chunk => {
+			
+				// 	emailChunks.push(chunk);
+			
+				// });
 				
-				stream.on("end", async () => {
+				// stream.on("end", async () => {
 				
-					const email = Buffer.concat(emailChunks);
-					db.emails.createEmail(session.envelope, email.toString("utf8"), db.emails.getMailboxesFromEnvelope(session.envelope), {
+				// 	const email = Buffer.concat(emailChunks);
+					// db.emails.createEmail(session.envelope, email.toString("utf8"), db.emails.getMailboxesFromEnvelope(session.envelope), {
 
-						remoteAddress: session.remoteAddress,
-						clientHostname: session.clientHostname
+					// 	remoteAddress: session.remoteAddress,
+					// 	clientHostname: session.clientHostname
 
-					});
-					await _this.sendEmail({
+					// });
+					// await _this.sendEmail({
 
-						to: session.envelope.rcptTo.map(_ => _.address),
-						from: session.envelope.mailFrom.address
+					// 	to: session.envelope.rcptTo.map(_ => _.address),
+					// 	from: session.envelope.mailFrom.address
 
-					}, email.toString("utf8"));
+					// }, email.toString("utf8"));
 
-					callback(null);
+				// 	callback(null);
 				
-				});
+				// });
 				
 			}
 			
@@ -156,7 +171,7 @@ class PostOfficeSMTP {
 	 * @param {{from: string, to: string[]}} envelope The message's envelope
 	 * @param {*} raw The message's raw data
 	 */
-	async sendEmail (envelope, raw) {
+	async sendEmail (envelope, rawPath) {
 
 		const mx = new Map();
 		const mxPort = new Map();
@@ -211,7 +226,11 @@ class PostOfficeSMTP {
 					from: envelope.from
 
 				},
-				raw
+				raw: {
+
+					path: rawPath
+
+				}
 				
 			}));
 			} catch (e) {console.error(e);} 
