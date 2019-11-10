@@ -92,26 +92,33 @@ class PostOfficeSMTP {
 				
 			},
 			
-			async onData (stream, session, callback) {
+			onData (stream, session, callback) {
 				
 				if (session.envelope.mailFrom.address.endsWith(`@${options.server.host}`) && !session.user) return callback(new Error("Authentication required"));
 				if (session.user && `${session.user}@${options.server.host}` !== session.envelope.mailFrom.address) return callback(new Error("Invalid sender"));
 
 				const emailPath = path.join(__dirname, "..", "..", "mail", `${Math.random().toString(36).replace("0.", "")}.eml`);
 
-				stream.pipe(fs.createWriteStream(emailPath));
-				db.emails.createEmail(session.envelope, (await mailparser.simpleParser(fs.createReadStream(emailPath))).messageId, emailPath, db.emails.getMailboxesFromEnvelope(session.envelope), {
+				console.log(`(smtp/info) Received email from "${session.envelope.mailFrom.address}" - storing...`);
 
-					remoteAddress: session.remoteAddress,
-					clientHostname: session.clientHostname
+				stream.pipe(fs.createWriteStream(emailPath)).on("close", async () => {
+
+					console.log(`(smtp/info) Successfully stored email from "${session.envelope.mailFrom.address}"!`);
+
+					db.emails.createEmail(session.envelope, (await mailparser.simpleParser(fs.createReadStream(emailPath))).messageId, emailPath, db.emails.getMailboxesFromEnvelope(session.envelope), {
+
+						remoteAddress: session.remoteAddress,
+						clientHostname: session.clientHostname
+	
+					});
+					await _this.sendEmail({
+	
+						to: session.envelope.rcptTo.map(_ => _.address),
+						from: session.envelope.mailFrom.address
+	
+					}, emailPath);
 
 				});
-				await _this.sendEmail({
-
-					to: session.envelope.rcptTo.map(_ => _.address),
-					from: session.envelope.mailFrom.address
-
-				}, emailPath);
 
 				// const emailChunks = [];
 				// stream.on("data", chunk => {
@@ -207,7 +214,7 @@ class PostOfficeSMTP {
 
 			}
 
-			console.log(`Sending email to ${mx.get(domain)[0].exchange}:${mxPort.get(domain)}.`)
+			console.log(`(smtp/info) Sending email to ${mx.get(domain)[0].exchange}:${mxPort.get(domain)}...`)
 
 			const transport = nodemailer.createTransport({
 				
