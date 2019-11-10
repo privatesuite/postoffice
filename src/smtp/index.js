@@ -73,8 +73,9 @@ class PostOfficeSMTP {
 						
 					}
 					
-				} else callback(new Error("Invalid recipient"));
-				
+				} else if (!session.user) callback(new Error("Invalid recipient"));
+				else callback(null);
+
 			},
 			
 			onMailFrom (address, session, callback) {
@@ -204,7 +205,12 @@ class PostOfficeSMTP {
 			try {
 			mail.push(transport.sendMail({
 				
-				envelope,
+				envelope: {
+
+					to: envelope.to.filter(_ => _.endsWith(`@${domain}`)),
+					from: envelope.from
+
+				},
 				raw
 				
 			}));
