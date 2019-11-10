@@ -2,9 +2,12 @@ const db = require("../db");
 const fs = require("fs");
 const path = require("path");
 const config = require("../utils/config");
+const smtpUtils = require("../utils/smtp");
 const SMTPServer = require("smtp-server").SMTPServer;
-const mailparser = require("mailparser");
+const nodemailer = require("nodemailer");
 const isPortReachable = require("is-port-reachable");
+
+const smtpPorts = [587, 465, 25];
 
 class PostOfficeSMTP {
 
@@ -70,7 +73,7 @@ class PostOfficeSMTP {
 						
 					}
 					
-				}
+				} else callback(null);
 				
 			},
 			
@@ -79,20 +82,18 @@ class PostOfficeSMTP {
 				if (address.address.endsWith(`@${options.server.host}`)) {
 					
 					if (!session.user) callback(new Error("Authentication required"));
-					else callback();
+					if (`${session.user}@${options.server.host}` !== address.address) return callback(new Error("Invalid sender"));
 
-				}
+					callback(null);
+
+				} else callback(null);
 				
 			},
 			
 			onData (stream, session, callback) {
 				
-				if (session.envelope.mailFrom.address.endsWith(`@${options.server.host}`) && !session.user) {
-
-					callback(new Error("Authentication required"));
-					return;
-
-				}
+				if (session.envelope.mailFrom.address.endsWith(`@${options.server.host}`) && !session.user) return callback(new Error("Authentication required"));
+				if (`${session.user}@${options.server.host}` !== session.envelope.mailFrom.address) return callback(new Error("Invalid sender"));
 
 				const emailChunks = [];
 				stream.on("data", chunk => {
@@ -101,7 +102,7 @@ class PostOfficeSMTP {
 			
 				});
 				
-				stream.on("end", () => {
+				stream.on("end", async () => {
 				
 					const email = Buffer.concat(emailChunks);
 					db.emails.createEmail(session.envelope, email.toString("utf8"), db.emails.getMailboxesFromEnvelope(session.envelope), {
@@ -110,6 +111,12 @@ class PostOfficeSMTP {
 						clientHostname: session.clientHostname
 
 					});
+					await _this.sendEmail({
+
+						to: session.envelope.rcptTo.map(_ => _.address),
+						from: session.envelope.mailFrom.address
+
+					}, email.toString("utf8"));
 
 					callback(null);
 				
@@ -139,6 +146,73 @@ class PostOfficeSMTP {
 			});
 			
 		});
+
+	}
+
+	/**
+	 * Send an email
+	 * 
+	 * @param {{from: string, to: string[]}} envelope The message's envelope
+	 * @param {*} raw The message's raw data
+	 */
+	async sendEmail (envelope, raw) {
+
+		const mx = new Map();
+		const mxPort = new Map();
+		const to = [...envelope.to];
+		const mail = [];
+
+		for (const recipient of to) {
+
+			const domain = recipient.split("@")[1];
+
+			if (domain === this.options.server.host) continue;
+
+			if (!mx.has(domain)) {
+
+				let mxd = await smtpUtils.mx(domain);
+				if (!mxd || domain === this.options.host) continue;
+				mx.set(domain, mxd);
+
+				const p = [];
+				for (const port of smtpPorts) {
+					
+					p.push(await isPortReachable(port, {
+
+						host: mxd[0].exchange
+	
+					}));
+
+				}
+				await Promise.all(p);
+				mxPort.set(domain, (p.map((_, __) => [_, smtpPorts[__]]).find(_ => _[0]) || [])[1]);
+
+			}
+
+			console.log(`Sending email to ${mx.get(domain)[0].exchange}:${mxPort.get(domain)}.`)
+
+			const transport = nodemailer.createTransport({
+				
+				host: mx.get(domain)[0].exchange,
+				port: mxPort.get(domain),
+	
+				name: this.options.server.host,
+				secure: mxPort.get(domain) !== 25
+				
+			});
+
+			try {
+			mail.push(transport.sendMail({
+				
+				envelope,
+				raw
+				
+			}));
+			} catch (e) {console.error(e);} 
+
+		}
+
+		return Promise.all(mail.map(_ => _.catch(__ => __)));
 
 	}
 
