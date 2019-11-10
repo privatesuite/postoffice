@@ -91,7 +91,7 @@ class PostOfficeSMTP {
 				
 			},
 			
-			onData (stream, session, callback) {
+			async onData (stream, session, callback) {
 				
 				if (session.envelope.mailFrom.address.endsWith(`@${options.server.host}`) && !session.user) return callback(new Error("Authentication required"));
 				if (session.user && `${session.user}@${options.server.host}` !== session.envelope.mailFrom.address) return callback(new Error("Invalid sender"));
@@ -169,9 +169,9 @@ class PostOfficeSMTP {
 	 * Send an email
 	 * 
 	 * @param {{from: string, to: string[]}} envelope The message's envelope
-	 * @param {*} raw The message's raw data
+	 * @param {string} emailPath The message's raw data file path
 	 */
-	async sendEmail (envelope, rawPath) {
+	async sendEmail (envelope, emailPath) {
 
 		const mx = new Map();
 		const mxPort = new Map();
@@ -228,7 +228,7 @@ class PostOfficeSMTP {
 				},
 				raw: {
 
-					path: rawPath
+					path: emailPath
 
 				}
 				
