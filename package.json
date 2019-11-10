@@ -12,7 +12,8 @@
     "js-sha512": "^0.8.0",
     "mailparser": "^2.7.6",
     "minimist": "^1.2.0",
+    "nodemailer": "^6.3.1",
     "smtp-server": "^3.5.0",
-    "streamlet": "privatesuite/streamlet"
+    "streamletdb": "^1.0.0"
   }
 }

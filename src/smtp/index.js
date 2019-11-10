@@ -1,12 +1,16 @@
 const db = require("../db");
+const fs = require("fs");
+const path = require("path");
 const config = require("../utils/config");
-const SMTPServer = require("smtp-server");
+const SMTPServer = require("smtp-server").SMTPServer;
 const mailparser = require("mailparser");
 const isPortReachable = require("is-port-reachable");
 
 class PostOfficeSMTP {
 
 	constructor (options, port = 25) {
+
+		const _this = this;
 
 		this.port = port;
 		this.options = options;
@@ -26,14 +30,6 @@ class PostOfficeSMTP {
 			
 			onAuth (auth, session, callback) {
 				
-				// console.log(`Authentication for user ${auth.username} requested`);
-				
-				// if (!(session.secure || !this.options.tlsRequired)) {
-					
-				// 	t.error(`Non-fatal: Client attempted to connect in violation of "tlsRequired".`);
-					
-				// }
-				
 				const loggedIn = db.users.login(auth.username, auth.password);
 				
 				if (loggedIn) {
@@ -46,7 +42,7 @@ class PostOfficeSMTP {
 					
 				} else {
 					
-					callback(new Error("Invalid username or password."));
+					callback(new Error("Invalid credentials"));
 					
 				}
 				
@@ -62,7 +58,7 @@ class PostOfficeSMTP {
 				
 				if (address.address.endsWith(`@${options.server.host}`)) {
 					
-					if (!t.userExists(address.address.replace(`@${options.server.host}`, ""))) {
+					if (!db.users.getUserByUsername(address.address.replace(`@${options.server.host}`, ""))) {
 						
 						callback(new Error("Recipient does not exist"));
 						return;
@@ -80,16 +76,53 @@ class PostOfficeSMTP {
 			
 			onMailFrom (address, session, callback) {
 				
-				callback();
+				if (address.address.endsWith(`@${options.server.host}`)) {
+					
+					if (!session.user) callback(new Error("Authentication required"));
+					else callback();
+
+				}
 				
 			},
 			
 			onData (stream, session, callback) {
 				
+				if (session.envelope.mailFrom.address.endsWith(`@${options.server.host}`) && !session.user) {
+
+					callback(new Error("Authentication required"));
+					return;
+
+				}
+
+				const emailChunks = [];
+				stream.on("data", chunk => {
+			
+					emailChunks.push(chunk);
+			
+				});
 				
+				stream.on("end", () => {
+				
+					const email = Buffer.concat(emailChunks);
+					db.emails.createEmail(session.envelope, email.toString("utf8"), db.emails.getMailboxesFromEnvelope(session.envelope), {
+
+						remoteAddress: session.remoteAddress,
+						clientHostname: session.clientHostname
+
+					});
+
+					callback(null);
+				
+				});
 				
 			}
 			
+		});
+
+		this.server.on("error", err => {
+
+			console.error(err);
+
 		});
 
 	}
@@ -100,7 +133,7 @@ class PostOfficeSMTP {
 			
 			this.server.listen(this.port, "0.0.0.0", () => {
 				
-				console.log(`Listening on port ${this.port}`);
+				console.log(`(smtp/info) PostOffice SMTP started on port ${this.port}`);
 				resolve();
 				
 			});

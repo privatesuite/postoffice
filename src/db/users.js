@@ -1,5 +1,5 @@
 const sha512 = require("js-sha512");
-const Streamlet = require("streamlet");
+const Streamlet = require("streamletdb");
 
 module.exports =
 
@@ -12,6 +12,12 @@ function (db) {
 	const emails = require("./emails")(db);
 	
 	return {
+
+		cleanUsername (username) {
+
+			return username.replace(/\./g, "").replace(/\+/g, "");
+		
+		},
 
 		hashPassword (password) {
 
@@ -32,11 +38,11 @@ function (db) {
 			type: "user"
 
 		}) {
-			
+
 			const userId = await db.insert({
 
 				type: "user",
-				username,
+				username: this.cleanUsername(username),
 				password,
 				
 				details
@@ -44,7 +50,7 @@ function (db) {
 			});
 
 			emails.createMailbox("Inbox", [userId], ["important"], ["immutable", "virtual"]);
-			emails.createMailbox("Outbox", [userId], ["important"], ["immutable", "virtual"]);
+			emails.createMailbox("Drafts", [userId], ["important"], ["immutable", "virtual"]);
 			emails.createMailbox("Sent", [userId], ["important"], ["immutable", "virtual"]);
 			
 			emails.createMailbox("Archive", [userId], [], ["immutable", "virtual"]);
@@ -82,7 +88,7 @@ function (db) {
 		 */
 		getUserByUsername (username) {
 
-			return this.allUsers().find(_ => _.username === username);
+			return this.allUsers().find(_ => _.username === this.cleanUsername(username));
 
 		},
 
@@ -94,7 +100,7 @@ function (db) {
 		 */
 		login (username, password) {
 
-			return this.allUsers().find(_ => _.username === username && _.password === this.hashPassword(password));
+			return this.allUsers().find(_ => _.username === this.cleanUsername(username) && _.password === this.hashPassword(password));
 
 		}
 

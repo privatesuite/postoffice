@@ -1,0 +1,7 @@
+2LNnucz7RhKHC7QaoUaLbg/0000000000-{"type":"user","username":"admin","password":"fabbea36c2efc97d50c454de12ee5339ddc7796901ea48f1b5d9630346f80edaac4625ba3199ef3c7fc3d62634bdb65ff9db167e0a862bc3d2190c9721d778b0","details":{"name":"admin","type":"admin"}}
+2LNnucz7RhKHC7QaoUaLbg/0000000001-{"type":"mailbox","name":"Inbox","users":["2LNnucz7RhKHC7QaoUaLbg/0000000000"],"tags":["important"],"attributes":["immutable","virtual"]}
+2LNnucz7RhKHC7QaoUaLbg/0000000002-{"type":"mailbox","name":"Outbox","users":["2LNnucz7RhKHC7QaoUaLbg/0000000000"],"tags":["important"],"attributes":["immutable","virtual"]}
+2LNnucz7RhKHC7QaoUaLbg/0000000003-{"type":"mailbox","name":"Sent","users":["2LNnucz7RhKHC7QaoUaLbg/0000000000"],"tags":["important"],"attributes":["immutable","virtual"]}
+2LNnucz7RhKHC7QaoUaLbg/0000000004-{"type":"mailbox","name":"Archive","users":["2LNnucz7RhKHC7QaoUaLbg/0000000000"],"tags":[],"attributes":["immutable","virtual"]}
+2LNnucz7RhKHC7QaoUaLbg/0000000005-{"type":"mailbox","name":"Spam","users":["2LNnucz7RhKHC7QaoUaLbg/0000000000"],"tags":[],"attributes":["immutable","virtual"]}
+2LNnucz7RhKHC7QaoUaLbg/0000000006-{"type":"mailbox","name":"Trash","users":["2LNnucz7RhKHC7QaoUaLbg/0000000000"],"tags":[],"attributes":["immutable","virtual"]}
