@@ -5,6 +5,7 @@ const config = require("../utils/config");
 const smtpUtils = require("../utils/smtp");
 const SMTPServer = require("smtp-server").SMTPServer;
 const nodemailer = require("nodemailer");
+const mailparser = require("mailparser");
 const isPortReachable = require("is-port-reachable");
 
 const smtpPorts = [587, 465, 25];
@@ -96,10 +97,10 @@ class PostOfficeSMTP {
 				if (session.envelope.mailFrom.address.endsWith(`@${options.server.host}`) && !session.user) return callback(new Error("Authentication required"));
 				if (session.user && `${session.user}@${options.server.host}` !== session.envelope.mailFrom.address) return callback(new Error("Invalid sender"));
 
-				const emailPath = path.join(__dirname, "..", "..", "mail", `${Math.random().toString(36).replace("0.", "")}}.eml`);
+				const emailPath = path.join(__dirname, "..", "..", "mail", `${Math.random().toString(36).replace("0.", "")}.eml`);
 
 				stream.pipe(fs.createWriteStream(emailPath));
-				db.emails.createEmail(session.envelope, emailPath, db.emails.getMailboxesFromEnvelope(session.envelope), {
+				db.emails.createEmail(session.envelope, (await mailparser.simpleParser(fs.createReadStream(emailPath))).messageId, emailPath, db.emails.getMailboxesFromEnvelope(session.envelope), {
 
 					remoteAddress: session.remoteAddress,
 					clientHostname: session.clientHostname

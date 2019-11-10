@@ -105,17 +105,19 @@ function (db) {
 		 * Add an email to the database.
 		 * 
 		 * @param {{mailFrom: object, rcptTo: object[]}} envelope The email's envelope
+		 * @param {string} messageId The email's messageId
 		 * @param {string} emailPath The email's raw MIME-formatted data's file path
 		 * @param {string[]} mailboxes The ids of the mailboxes the email is in
 		 * @param {{remoteAddress: string, clientHostname: string}} metadata The email's metadata (origin IP, and reverse resolved hostname)
 		 * @param {*} tags The email's tags
 		 */
-		createEmail (envelope, emailPath, mailboxes, metadata, tags = []) {
+		createEmail (envelope, messageId, emailPath, mailboxes, metadata, tags = []) {
 
 			return db.insert({
 
 				type: "email",
 				envelope,
+				messageId,
 				emailPath,
 				mailboxes,
 				metadata,
