@@ -118,6 +118,8 @@ class PostOfficeSMTP {
 	
 					}, emailPath);
 
+					callback(null);
+
 				});
 
 				// const emailChunks = [];
