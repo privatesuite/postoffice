@@ -98,6 +98,7 @@ class PostOfficeSMTP {
 
 				const emailPath = path.join(__dirname, "..", "..", "mail", `${Math.random().toString(36).replace("0.", "")}}.eml`);
 
+				stream.pipe(fs.createWriteStream(emailPath));
 				db.emails.createEmail(session.envelope, emailPath, db.emails.getMailboxesFromEnvelope(session.envelope), {
 
 					remoteAddress: session.remoteAddress,
