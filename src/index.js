@@ -2,6 +2,7 @@ const db = require("./db");
 const args = require("minimist")(process.argv.slice(2));
 const path = require("path");
 const smtp = require("./smtp");
+const imap = require("./imap");
 const config = require("./utils/config");
 
 (async () => {
@@ -27,11 +28,18 @@ const config = require("./utils/config");
 	}
 
 	const s = [];
-	const ports = !Array.isArray(config().smtp.port) ? [config().smtp.port] : config().smtp.port;
+	const smtpPorts = !Array.isArray(config().smtp.port) ? [config().smtp.port] : config().smtp.port;
+	const imapPorts = !Array.isArray(config().imap.port) ? [config().imap.port] : config().imap.port;
 
-	for (const port of ports) {
+	for (const port of smtpPorts) {
 		
 		s.push(smtp.start(port));
+
+	}
+	
+	for (const port of imapPorts) {
+		
+		s.push(imap.start(port));
 
 	}
 
