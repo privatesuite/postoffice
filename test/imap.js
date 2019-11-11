@@ -15,4 +15,8 @@ const client = new ImapClient("localhost", 143, {
 
 });
 
-client.connect();
+client.connect().then(async () => {
+
+	console.log(await client.listMailboxes())
+
+});

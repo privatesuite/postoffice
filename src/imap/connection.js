@@ -26,13 +26,11 @@ module.exports = class IMAPConnection {
 
 		this.socket.pipe(this.parser);
 
-		this.user = "";
+		this.user = {};
 
 	}
 
 	startTLS (tag) {
-
-		// this.socket.pause();
 
 		const certs = {
 
@@ -53,9 +51,7 @@ module.exports = class IMAPConnection {
 			
 			secureContext: tls.createSecureContext({
 
-			...certs,
-			// secureOptions: constants.SSL_OP_NO_SSLv3,
-			// secureProtocol: "SSLv23_method"
+				...certs,
 
 			}),
 
@@ -72,12 +68,9 @@ module.exports = class IMAPConnection {
 
 		});
 
-		// this.socket.pipe(tlsSocket);
-		// tlsSocket.pipe(this.socket);
-
 	}
 
-	onLine (line) {
+	async onLine (line) {
 
 		console.log(line);
 
@@ -102,6 +95,7 @@ module.exports = class IMAPConnection {
 			if (login) {
 
 				this.send(tag, "ok", "Logged in.");
+				this.user = await db.users.getUserByUsername(args[0]);
 
 			} else {
 
@@ -113,6 +107,28 @@ module.exports = class IMAPConnection {
 
 			this.send("*", "bye", "Logging out.");
 			this.send(tag, "ok", "Logout completed.");
+
+		} else if (command === "list") {
+
+			const mailboxes = db.emails.getMailboxesWithUser(this.user._id);
+
+			this.send("*", "list", `(\\HasNoChildren) "." "INBOX"`);
+
+			for (const mailbox of mailboxes) {
+
+				if (mailbox.name.toLowerCase() !== "inbox") {
+
+					this.send("*", "list", `(\\HasNoChildren) "." "${mailbox.name}"`);
+
+				}
+
+			}
+
+			this.send(tag, "ok", "List completed.");
+
+		} else if (command === "lsub") {
+
+			this.send(tag, "ok", "Lsub completed.");
 
 		}
 
