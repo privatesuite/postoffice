@@ -109,7 +109,8 @@ class PostOfficeSMTP {
 
 					console.log(`(smtp/info) Successfully stored email from "${session.envelope.mailFrom.address}"!`);
 
-					db.emails.createEmail(session.envelope, (await mailparser.simpleParser(fs.createReadStream(emailPath))).messageId, emailPath, db.emails.getMailboxesFromEnvelope(session.envelope), {
+					const parsedMessage = await mailparser.simpleParser(fs.createReadStream(emailPath));
+					db.emails.createEmail(session.envelope, parsedMessage.messageId, emailPath, db.emails.getMailboxesFromEnvelope(session.envelope), {
 
 						remoteAddress: session.remoteAddress,
 						clientHostname: session.clientHostname
@@ -118,7 +119,8 @@ class PostOfficeSMTP {
 					await _this.sendEmail({
 	
 						to: session.envelope.rcptTo.map(_ => _.address),
-						from: session.envelope.mailFrom.address
+						from: session.envelope.mailFrom.address,
+						received: parsedMessage.date
 	
 					}, emailPath);
 

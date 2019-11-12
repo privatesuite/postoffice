@@ -128,7 +128,31 @@ module.exports = class IMAPConnection {
 
 		} else if (command === "lsub") {
 
-			this.send(tag, "ok", "Lsub completed.");
+			const mailboxes = db.emails.getMailboxesWithUser(this.user._id);
+
+			this.send("*", "list", `(\\HasNoChildren) "." "INBOX"`);
+
+			for (const mailbox of mailboxes) {
+
+				if (mailbox.name.toLowerCase() !== "inbox") {
+
+					this.send("*", "lsub", `(\\HasNoChildren) "." "${mailbox.name}"`);
+
+				}
+
+			}
+
+			this.send(tag, "ok", "LSUB completed.");
+
+		} else if (command === "select") {
+
+			const mailbox = db.emails.getUsersMailboxByName(this.user._id, args[0]);
+
+			if (mailbox) {
+
+				console.log(mailbox);
+
+			} else this.send(tag, "no", "Error: Mailbox does not exist.")
 
 		}
 

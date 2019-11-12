@@ -17,6 +17,8 @@ const client = new ImapClient("localhost", 143, {
 
 client.connect().then(async () => {
 
-	console.log(await client.listMailboxes())
+	console.log(await client.listMailboxes());
+
+	console.log(await client.selectMailbox("INBOXaa"));
 
 });

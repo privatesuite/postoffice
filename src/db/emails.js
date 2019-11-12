@@ -82,7 +82,7 @@ function (db) {
 		 */
 		getUsersMailboxByName (user, name) {
 
-			return this.getMailboxesWithUser(user).find(_ => _.name === name);
+			return this.getMailboxesWithUser(user).find(_ => _.name.toLowerCase() === name.toLowerCase());
 
 		},
 
@@ -108,7 +108,7 @@ function (db) {
 		 * @param {string} messageId The email's messageId
 		 * @param {string} emailPath The email's raw MIME-formatted data's file path
 		 * @param {string[]} mailboxes The ids of the mailboxes the email is in
-		 * @param {{remoteAddress: string, clientHostname: string}} metadata The email's metadata (origin IP, and reverse resolved hostname)
+		 * @param {{remoteAddress: string, clientHostname: string, received: Date}} metadata The email's metadata (origin IP, and reverse resolved hostname, received date)
 		 * @param {*} tags The email's tags
 		 */
 		createEmail (envelope, messageId, emailPath, mailboxes, metadata, tags = []) {
