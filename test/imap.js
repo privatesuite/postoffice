@@ -19,6 +19,6 @@ client.connect().then(async () => {
 
 	console.log(await client.listMailboxes());
 
-	console.log(await client.selectMailbox("INBOXaa"));
+	console.log(await client.selectMailbox("INBOX"));
 
 });

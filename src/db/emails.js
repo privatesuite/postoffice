@@ -127,15 +127,9 @@ function (db) {
 
 		},
 
-		addEmailToMailbox () {
-			
-			
+		getEmailsInMailbox (mailbox) {
 
-		},
-
-		removeEmailFromMailbox () {
-
-
+			return db.find(_ => _.type === "email" && _.mailboxes.indexOf(mailbox) !== -1);
 
 		}
 

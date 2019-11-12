@@ -3,6 +3,7 @@ const fs = require("fs");
 const net = require("net");
 const tls = require("tls");
 const path = require("path");
+const imapUtils = require("../utils/imap");
 const imapParser = require("imap-parser");
 
 const capabilities = ["IMAP4rev1", "SASL-IR", "STARTTLS"];
@@ -124,7 +125,7 @@ module.exports = class IMAPConnection {
 
 			}
 
-			this.send(tag, "ok", "List completed.");
+			this.send(tag, "ok", "LIST completed.");
 
 		} else if (command === "lsub") {
 
@@ -150,7 +151,12 @@ module.exports = class IMAPConnection {
 
 			if (mailbox) {
 
-				console.log(mailbox);
+				const emails = await db.emails.getEmailsInMailbox(db.emails.getUsersMailboxByName(this.user._id, args[0]));
+
+				this.send("*", emails.length + "", "EXISTS");
+				this.send("*", emails.find(_ => Date.now() - _.metadata.date < 8.64e+7 * 2).length + "", "RECENT");
+
+				this.send(tag, "ok", `[${mailbox.attributes.readOnly ? "READ-ONLY" : "READ-WRITE"}] SELECT completed.`);
 
 			} else this.send(tag, "no", "Error: Mailbox does not exist.")
 
