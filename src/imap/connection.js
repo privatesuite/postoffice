@@ -20,6 +20,7 @@ module.exports = class IMAPConnection {
 
 		this.server = server;
 		this.socket = socket;
+		this.socket.on("error", err => console.log(err));
 
 		this.parser = new imapParser();
 		this.parser.on("data", _ => this.onLine(_));
