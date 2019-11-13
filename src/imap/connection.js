@@ -28,6 +28,7 @@ module.exports = class IMAPConnection {
 		this.socket.pipe(this.parser);
 
 		this.user = {};
+		this.selectedMailbox = {};
 
 	}
 
@@ -148,14 +149,37 @@ module.exports = class IMAPConnection {
 		} else if (command === "select") {
 
 			const mailbox = db.emails.getUsersMailboxByName(this.user._id, args[0]);
+			this.selectedMailbox = mailbox;
 
 			if (mailbox) {
 
 				const emails = await db.emails.getEmailsInMailbox(db.emails.getUsersMailboxByName(this.user._id, args[0]));
+				const unseen = (await db.emails.filterUnseen(this.user._id, emails)).reverse();
+
+				this.send("*", emails.length + "", "EXISTS");
+				this.send("*", emails.filter(_ => Date.now() - _.metadata.date < 8.64e+7 * 2).length + "", "RECENT");
+				if (unseen.length) this.send("*", "ok", `[UNSEEN ${unseen[0].sequenceNumber}] Message ${unseen[0].sequenceNumber} is first unseen.`);
+				this.send("*", "ok", `[UIDVALIDITY ${imapUtils.generateUID(mailbox._id)}] UIDs valid.`);
+				this.send("*", "flags", "(\\Answered \\Flagged \\Deleted \\Seen)");
+				this.send(tag, "ok", `[${mailbox.attributes.readOnly ? "READ-ONLY" : "READ-WRITE"}] SELECT completed.`);
+
+			} else this.send(tag, "no", "Error: Mailbox does not exist.")
+
+		} else if (command === "examine") {
+
+			const mailbox = db.emails.getUsersMailboxByName(this.user._id, args[0]);
+			this.selectedMailbox = mailbox;
+
+			if (mailbox) {
+
+				const emails = await db.emails.getEmailsInMailbox(db.emails.getUsersMailboxByName(this.user._id, args[0]));
+				const unseen = (await db.emails.filterUnseen(this.user._id, emails)).reverse();
 
 				this.send("*", emails.length + "", "EXISTS");
 				this.send("*", emails.find(_ => Date.now() - _.metadata.date < 8.64e+7 * 2).length + "", "RECENT");
-
+				this.send("*", "ok", `[UNSEEN ${unseen[0].sequenceNumber}] Message ${unseen[0].sequenceNumber} is first unseen.`);
+				this.send("*", "ok", `[UIDVALIDITY ${imapUtils.generateUID(mailbox._id)}] UIDs valid.`);
+				this.send("*", "flags", "(\\Answered \\Flagged \\Deleted \\Seen)");
 				this.send(tag, "ok", `[${mailbox.attributes.readOnly ? "READ-ONLY" : "READ-WRITE"}] SELECT completed.`);
 
 			} else this.send(tag, "no", "Error: Mailbox does not exist.")

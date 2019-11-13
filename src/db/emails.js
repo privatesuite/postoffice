@@ -129,7 +129,42 @@ function (db) {
 
 		getEmailsInMailbox (mailbox) {
 
-			return db.find(_ => _.type === "email" && _.mailboxes.indexOf(mailbox) !== -1);
+			return db.find(_ => _.type === "email" && _.mailboxes.indexOf(mailbox) !== -1).map((_, i) => ({
+
+				..._,
+				sequenceNumber: i + 1
+
+			}));
+
+		},
+
+		seeEmail (user, email) {
+
+			return db.insert({
+
+				type: "seen",
+				user,
+				email
+
+			});
+
+		},
+
+		isSeen (user, email) {
+
+			return db.findOne(_ => _.type === "seen" && _.user === user && _.email === email);
+
+		},
+
+		async unseeEmail (user, email) {
+
+			return db.delete((await this.isSeen(user, email))._id);
+
+		},
+
+		filterUnseen (user, emails) {
+
+			return emails.filter(_ => this.isSeen(user, _._id));
 
 		}
 
