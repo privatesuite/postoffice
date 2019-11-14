@@ -24,7 +24,7 @@ module.exports = class IMAPConnection {
 
 		this.parser = new imapParser();
 		this.parser.on("data", _ => this.onLine(_));
-		this.send(null, "OK", "PostOffice IMAP greets you!");
+		this.send(null, "ok", "PostOffice IMAP greets you!");
 
 		this.socket.pipe(this.parser);
 

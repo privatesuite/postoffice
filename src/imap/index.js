@@ -16,6 +16,7 @@ class PostOfficeIMAP {
 
 	createConnection (socket) {
 
+		console.log(`New connection from ${socket.remoteAddress}.`);
 		return new IMAPConnection(this, socket);
 
 	}
