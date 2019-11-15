@@ -163,8 +163,9 @@ module.exports = class IMAPConnection {
 				this.send("*", "ok", `[UIDVALIDITY ${imapUtils.generateUID(mailbox._id)}] UIDs valid.`);
 				this.send("*", "flags", "(\\Answered \\Flagged \\Deleted \\Seen)");
 				this.send(tag, "ok", `[${mailbox.attributes.readOnly ? "READ-ONLY" : "READ-WRITE"}] SELECT completed.`);
+				console.log(`SELECT for ${mailbox.name} complete!`);
 
-			} else this.send(tag, "no", "Error: Mailbox does not exist.")
+			} else this.send(tag, "no", "Error: Mailbox does not exist.");
 
 		} else if (command === "examine") {
 
