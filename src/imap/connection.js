@@ -157,16 +157,12 @@ module.exports = class IMAPConnection {
 				const emails = await db.emails.getEmailsInMailbox(mailbox._id);
 				const unseen = (await db.emails.filterUnseen(this.user._id, emails)).reverse();
 
-				console.log(emails);
-				console.log(unseen);
-
 				this.send("*", emails.length + "", "EXISTS");
 				this.send("*", emails.filter(_ => Date.now() - _.metadata.date < 8.64e+7 * 2).length + "", "RECENT");
 				if (unseen.length) this.send("*", "ok", `[UNSEEN ${unseen[0].sequenceNumber}] Message ${unseen[0].sequenceNumber} is first unseen.`);
 				this.send("*", "ok", `[UIDVALIDITY ${imapUtils.generateUID(mailbox._id)}] UIDs valid.`);
 				this.send("*", "flags", "(\\Answered \\Flagged \\Deleted \\Seen)");
 				this.send(tag, "ok", `[${mailbox.attributes.readOnly ? "READ-ONLY" : "READ-WRITE"}] SELECT completed.`);
-				console.log(`SELECT for ${mailbox.name} complete!`);
 
 			} else this.send(tag, "no", "Error: Mailbox does not exist.");
 
@@ -177,17 +173,32 @@ module.exports = class IMAPConnection {
 
 			if (mailbox) {
 
-				const emails = await db.emails.getEmailsInMailbox(db.emails.getUsersMailboxByName(this.user._id, args[0]));
+				const emails = await db.emails.getEmailsInMailbox(mailbox._id);
 				const unseen = (await db.emails.filterUnseen(this.user._id, emails)).reverse();
 
 				this.send("*", emails.length + "", "EXISTS");
-				this.send("*", emails.find(_ => Date.now() - _.metadata.date < 8.64e+7 * 2).length + "", "RECENT");
-				this.send("*", "ok", `[UNSEEN ${unseen[0].sequenceNumber}] Message ${unseen[0].sequenceNumber} is first unseen.`);
+				this.send("*", emails.filter(_ => Date.now() - _.metadata.date < 8.64e+7 * 2).length + "", "RECENT");
+				if (unseen.length) this.send("*", "ok", `[UNSEEN ${unseen[0].sequenceNumber}] Message ${unseen[0].sequenceNumber} is first unseen.`);
 				this.send("*", "ok", `[UIDVALIDITY ${imapUtils.generateUID(mailbox._id)}] UIDs valid.`);
 				this.send("*", "flags", "(\\Answered \\Flagged \\Deleted \\Seen)");
-				this.send(tag, "ok", `[${mailbox.attributes.readOnly ? "READ-ONLY" : "READ-WRITE"}] SELECT completed.`);
+				this.send(tag, "ok", `[READ-ONLY] SELECT completed.`);
 
-			} else this.send(tag, "no", "Error: Mailbox does not exist.")
+			} else this.send(tag, "no", "Error: Mailbox does not exist.");
+
+		} else if (command === "uid") {
+
+			if (args[0] === "fetch") {
+
+				const emails = imapUtils.slice(await db.emails.getEmailsInMailbox(this.selectedMailbox._id), args[1]);
+
+				for (const email of emails) {
+					
+					console.log("*", email.sequenceNumber, `FETCH (FLAGS (${await db.emails.isSeen(this.user._id, email._id)}) UID ${imapUtils.generateUID(email._id)})`)
+					this.send("*", email.sequenceNumber, `FETCH (FLAGS (${await db.emails.isSeen(this.user._id, email._id)}) UID ${imapUtils.generateUID(email._id)})`);
+
+				}
+
+			}
 
 		}
 
