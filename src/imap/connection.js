@@ -193,10 +193,11 @@ module.exports = class IMAPConnection {
 
 				for (const email of emails) {
 					
-					console.log("*", email.sequenceNumber, `FETCH (FLAGS (${(await db.emails.isSeen(this.user._id, email._id)) ? "\\Seen" : ""}) UID ${imapUtils.generateUID(email._id)})`)
 					this.send("*", email.sequenceNumber, `FETCH (FLAGS (${(await db.emails.isSeen(this.user._id, email._id)) ? "\\Seen" : ""}) UID ${imapUtils.generateUID(email._id)})`);
 
 				}
+
+				this.send(tag, "ok", "UID FETCH completed.");
 
 			}
 
