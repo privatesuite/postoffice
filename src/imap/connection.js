@@ -154,7 +154,7 @@ module.exports = class IMAPConnection {
 
 			if (mailbox) {
 
-				const emails = await db.emails.getEmailsInMailbox(db.emails.getUsersMailboxByName(this.user._id, args[0]));
+				const emails = await db.emails.getEmailsInMailbox(mailbox._id);
 				const unseen = (await db.emails.filterUnseen(this.user._id, emails)).reverse();
 
 				console.log(emails);
