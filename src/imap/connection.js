@@ -157,6 +157,9 @@ module.exports = class IMAPConnection {
 				const emails = await db.emails.getEmailsInMailbox(db.emails.getUsersMailboxByName(this.user._id, args[0]));
 				const unseen = (await db.emails.filterUnseen(this.user._id, emails)).reverse();
 
+				console.log(emails);
+				console.log(unseen);
+
 				this.send("*", emails.length + "", "EXISTS");
 				this.send("*", emails.filter(_ => Date.now() - _.metadata.date < 8.64e+7 * 2).length + "", "RECENT");
 				if (unseen.length) this.send("*", "ok", `[UNSEEN ${unseen[0].sequenceNumber}] Message ${unseen[0].sequenceNumber} is first unseen.`);
