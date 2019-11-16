@@ -189,11 +189,11 @@ module.exports = class IMAPConnection {
 
 			if (args[0] === "fetch") {
 
-				const emails = imapUtils.slice(await db.emails.getEmailsInMailbox(this.selectedMailbox._id), args[1]);
+				const emails = imapUtils.sliceFromUID(await db.emails.getEmailsInMailbox(this.selectedMailbox._id), args[1]);
 
 				for (const email of emails) {
 					
-					this.send("*", email.sequenceNumber, `FETCH (FLAGS (${(await db.emails.isSeen(this.user._id, email._id)) ? "\\Seen" : ""}) UID ${imapUtils.generateUID(email._id)})`);
+					this.send("*", email.sequenceNumber, `FETCH (FLAGS (${(await db.emails.isSeen(this.user._id, email._id)) ? "\\Seen" : ""}) UID ${email.uid})`);
 
 				}
 

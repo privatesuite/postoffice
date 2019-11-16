@@ -13,9 +13,49 @@ function (db) {
 
 	return {
 
+		getUidCounter () {
+
+			return db.find(_ => _.type === "uid_counter");
+
+		},
+
+		newUid () {
+
+			let a = 1;
+			if (this.getUidCounter()) a = this.getUidCounter().value + 1;
+
+			this.setUidCounter(a);
+			return a;
+
+		},
+
+		/**
+		 * Set the UID counter to a value
+		 * 
+		 * @param {string} value The current UID
+		 */
+		async setUidCounter (value) {
+
+			if (this.getUidCounter()) await db.delete(this.getUidCounter()._id);
+
+			db.insert({
+
+				type: "uid_counter",
+				value: value.padStart(32, "0")
+
+			});
+
+		},
+
 		allMailboxes () {
 
 			return db.find(_ => _.type === "mailbox");
+
+		},
+
+		allEmails () {
+
+			return db.find(_ => _.type === "email");
 
 		},
 
@@ -121,7 +161,9 @@ function (db) {
 				emailPath,
 				mailboxes,
 				metadata,
-				tags
+				tags,
+
+				uid: this.newUid()
 
 			});
 
@@ -129,7 +171,7 @@ function (db) {
 
 		getEmailsInMailbox (mailbox) {
 
-			return db.find(_ => _.type === "email" && _.mailboxes.indexOf(mailbox) !== -1).map((_, i) => ({
+			return this.allEmails().filter(_ => _.type === "email" && _.mailboxes.indexOf(mailbox) !== -1).map((_, i) => ({
 
 				..._,
 				sequenceNumber: i + 1
