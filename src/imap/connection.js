@@ -195,6 +195,7 @@ module.exports = class IMAPConnection {
 
 				for (const email of emails) {
 					
+					console.log(email);
 					this.send("*", email.sequenceNumber, `FETCH (FLAGS (${(await db.emails.isSeen(this.user._id, email._id)) ? "\\Seen" : ""}) UID ${email.uid})`);
 
 				}
