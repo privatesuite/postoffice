@@ -19,6 +19,15 @@ function (db) {
 
 		},
 
+		nextUid () {
+
+			let a = 1;
+			if (this.getUidCounter()) a = parseInt(this.getUidCounter().value) + 1;
+
+			return a;
+
+		},
+
 		async newUid () {
 
 			let a = 1;

@@ -161,6 +161,7 @@ module.exports = class IMAPConnection {
 				this.send("*", emails.filter(_ => Date.now() - _.metadata.date < 8.64e+7 * 2).length + "", "RECENT");
 				if (unseen.length) this.send("*", "ok", `[UNSEEN ${unseen[0].sequenceNumber}] Message ${unseen[0].sequenceNumber} is first unseen.`);
 				this.send("*", "ok", `[UIDVALIDITY ${imapUtils.generateUID(mailbox._id)}] UIDs valid.`);
+				this.send("*", "ok", `[UIDNEXT ${db.emails.nextUid()}] UIDs valid.`);
 				this.send("*", "flags", "(\\Answered \\Flagged \\Deleted \\Seen)");
 				this.send(tag, "ok", `[${mailbox.attributes.readOnly ? "READ-ONLY" : "READ-WRITE"}] SELECT completed.`);
 
@@ -180,6 +181,7 @@ module.exports = class IMAPConnection {
 				this.send("*", emails.filter(_ => Date.now() - _.metadata.date < 8.64e+7 * 2).length + "", "RECENT");
 				if (unseen.length) this.send("*", "ok", `[UNSEEN ${unseen[0].sequenceNumber}] Message ${unseen[0].sequenceNumber} is first unseen.`);
 				this.send("*", "ok", `[UIDVALIDITY ${imapUtils.generateUID(mailbox._id)}] UIDs valid.`);
+				this.send("*", "ok", `[UIDNEXT ${db.emails.nextUid()}] UIDs valid.`);
 				this.send("*", "flags", "(\\Answered \\Flagged \\Deleted \\Seen)");
 				this.send(tag, "ok", `[READ-ONLY] SELECT completed.`);
 
