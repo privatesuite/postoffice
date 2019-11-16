@@ -19,12 +19,12 @@ function (db) {
 
 		},
 
-		newUid () {
+		async newUid () {
 
 			let a = 1;
 			if (this.getUidCounter()) a = parseInt(this.getUidCounter().value) + 1;
 
-			this.setUidCounter(a);
+			await this.setUidCounter(a);
 			return (a + "").padStart(32, "0");
 
 		},
@@ -151,9 +151,9 @@ function (db) {
 		 * @param {{remoteAddress: string, clientHostname: string, received: Date}} metadata The email's metadata (origin IP, and reverse resolved hostname, received date)
 		 * @param {*} tags The email's tags
 		 */
-		createEmail (envelope, messageId, emailPath, mailboxes, metadata, tags = []) {
+		async createEmail (envelope, messageId, emailPath, mailboxes, metadata, tags = []) {
 
-			return db.insert({
+			return await db.insert({
 
 				type: "email",
 				envelope,
@@ -163,7 +163,7 @@ function (db) {
 				metadata,
 				tags,
 
-				uid: this.newUid()
+				uid: await this.newUid()
 
 			});
 
