@@ -15,7 +15,7 @@ function (db) {
 
 		getUidCounter () {
 
-			return db.find(_ => _.type === "uid_counter");
+			return db.findOne(_ => _.type === "uid_counter");
 
 		},
 
