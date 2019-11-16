@@ -34,16 +34,27 @@ function (db) {
 		 * 
 		 * @param {string} value The current UID
 		 */
-		async setUidCounter (value) {
+		setUidCounter (value) {
 
-			if (this.getUidCounter()) await db.delete(this.getUidCounter()._id);
+			if (this.getUidCounter()) {
 
-			db.insert({
+				return db.edit(this.getUidCounter()._id, {
 
-				type: "uid_counter",
-				value: (value + "").padStart(32, "0")
+					type: "uid_counter",
+					value: (value + "").padStart(32, "0")
 
-			});
+				});
+
+			} else {
+
+				return db.insert({
+
+					type: "uid_counter",
+					value: (value + "").padStart(32, "0")
+
+				});
+
+			}
 
 		},
 
