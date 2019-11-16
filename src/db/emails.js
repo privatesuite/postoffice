@@ -22,10 +22,10 @@ function (db) {
 		newUid () {
 
 			let a = 1;
-			if (this.getUidCounter()) a = this.getUidCounter().value + 1;
+			if (this.getUidCounter()) a = parseInt(this.getUidCounter().value) + 1;
 
 			this.setUidCounter(a);
-			return a;
+			return (a + "").padStart(32, "0");
 
 		},
 
@@ -41,7 +41,7 @@ function (db) {
 			db.insert({
 
 				type: "uid_counter",
-				value: value.padStart(32, "0")
+				value: (value + "").padStart(32, "0")
 
 			});
 
