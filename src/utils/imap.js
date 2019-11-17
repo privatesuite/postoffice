@@ -24,6 +24,13 @@ module.exports = {
 
 		return arr.filter(_ => parseInt(_.uid) >= a && parseInt(_.uid) <= (b === "*" ? (parseInt(_.uid) + 100) : b));
 
+	},
+
+	isRecent (then, now = Date.now()) {
+
+		console.log(then);
+		return (now - then) < (8.64e+7 * 2);
+
 	}
 
 }

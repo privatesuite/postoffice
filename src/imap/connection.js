@@ -89,7 +89,7 @@ module.exports = class IMAPConnection {
 
 		} else if (command === "capability") {
 
-			this.send(null, "capability", capabilities.join());
+			this.send("*", "capability", capabilities.join());
 			this.send(tag, "ok", "Capabilities listed.");
 
 		} else if (command === "login") {
@@ -162,7 +162,7 @@ module.exports = class IMAPConnection {
 				const unseen = (await db.emails.filterUnseen(this.user._id, emails)).reverse();
 
 				this.send("*", emails.length + "", "EXISTS");
-				this.send("*", emails.filter(_ => Date.now() - _.metadata.date < 8.64e+7 * 2).length + "", "RECENT");
+				this.send("*", emails.filter(_ => imapUtils.isRecent(_.metadata.date)).length + "", "RECENT");
 				if (unseen.length) this.send("*", "ok", `[UNSEEN ${unseen[0].sequenceNumber}] Message ${unseen[0].sequenceNumber} is first unseen.`);
 				this.send("*", "ok", `[UIDVALIDITY ${imapUtils.generateUID(mailbox._id)}] UIDs valid.`);
 				this.send("*", "ok", `[UIDNEXT ${db.emails.nextUid()}] UIDs valid.`);
@@ -182,7 +182,7 @@ module.exports = class IMAPConnection {
 				const unseen = (await db.emails.filterUnseen(this.user._id, emails)).reverse();
 
 				this.send("*", emails.length + "", "EXISTS");
-				this.send("*", emails.filter(_ => Date.now() - _.metadata.date < 8.64e+7 * 2).length + "", "RECENT");
+				this.send("*", emails.filter(_ => imapUtils.isRecent(_.metadata.date)).length + "", "RECENT");
 				if (unseen.length) this.send("*", "ok", `[UNSEEN ${unseen[0].sequenceNumber}] Message ${unseen[0].sequenceNumber} is first unseen.`);
 				this.send("*", "ok", `[UIDVALIDITY ${imapUtils.generateUID(mailbox._id)}] UIDs valid.`);
 				this.send("*", "ok", `[UIDNEXT ${db.emails.nextUid()}] Next UID is ${db.emails.nextUid()}.`);
@@ -223,6 +223,7 @@ module.exports = class IMAPConnection {
 
 					}
 					
+					console.log(args[2].map(__ => _(__)))
 					this.send("*", email.sequenceNumber + "", `FETCH (${(args[2].map(__ => _(__))).join(" ")})`);
 
 				}
