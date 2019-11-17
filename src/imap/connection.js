@@ -209,7 +209,7 @@ module.exports = class IMAPConnection {
 
 						} else if (type === "flags") {
 
-							return `FLAGS (${(await db.emails.isSeen(this.user._id, email._id)) ? "\\Seen" : ""})`;
+							return `FLAGS (${(db.emails.isSeen(this.user._id, email._id)) ? "\\Seen" : ""})`;
 
 						} else if (type === "rfc822.size") {
 
