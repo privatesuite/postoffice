@@ -168,7 +168,7 @@ function (db) {
 		 * @param {string} messageId The email's messageId
 		 * @param {string} emailPath The email's raw MIME-formatted data's file path
 		 * @param {string[]} mailboxes The ids of the mailboxes the email is in
-		 * @param {{remoteAddress: string, clientHostname: string, received: Date}} metadata The email's metadata (origin IP, and reverse resolved hostname, received date)
+		 * @param {{remoteAddress: string, clientHostname: string, date: Date}} metadata The email's metadata (origin IP, and reverse resolved hostname, received date)
 		 * @param {*} tags The email's tags
 		 */
 		async createEmail (envelope, messageId, emailPath, mailboxes, metadata, tags = []) {
