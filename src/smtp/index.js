@@ -113,7 +113,8 @@ class PostOfficeSMTP {
 					db.emails.createEmail(session.envelope, parsedMessage.messageId, emailPath, db.emails.getMailboxesFromEnvelope(session.envelope), {
 
 						remoteAddress: session.remoteAddress,
-						clientHostname: session.clientHostname
+						clientHostname: session.clientHostname,
+						received: new Date()
 	
 					});
 					await _this.sendEmail({
