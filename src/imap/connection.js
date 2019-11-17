@@ -199,7 +199,7 @@ module.exports = class IMAPConnection {
 
 				for (const email of emails) {
 
-					function _ (type) {
+					const _ = type => {
 
 						type = type.toLowerCase();
 
