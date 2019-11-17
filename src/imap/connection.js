@@ -81,7 +81,7 @@ module.exports = class IMAPConnection {
 		const command = (line[1] || "").toLowerCase();
 		const args = line.slice(2);
 
-		console.log(tag, command, args);
+		console.log(`Client: ${tag} ${command}`, args);
 
 		if (command === "starttls") {
 
@@ -111,7 +111,11 @@ module.exports = class IMAPConnection {
 			this.send("*", "bye", "Logging out.");
 			this.send(tag, "ok", "Logout completed.");
 
-		} else if (command === "list") {
+		}
+		
+		if (!this.user.username) return;
+
+		if (command === "list") {
 
 			const mailboxes = db.emails.getMailboxesWithUser(this.user._id);
 
@@ -194,8 +198,32 @@ module.exports = class IMAPConnection {
 				const emails = imapUtils.sliceFromUID(await db.emails.getEmailsInMailbox(this.selectedMailbox._id), args[1]);
 
 				for (const email of emails) {
+
+					function _ (type) {
+
+						type = type.toLowerCase();
+
+						if (type === "uid") {
+
+							return `UID ${email.uid}`;
+
+						} else if (type === "flags") {
+
+							return `FLAGS (${(await db.emails.isSeen(this.user._id, email._id)) ? "\\Seen" : ""})`;
+
+						} else if (type === "rfc822.size") {
+
+							return `RFC822.SIZE ${fs.statSync(email.emailPath).size}`;
+
+						} else if (type === "rfc822.header" || type === "body.peek[header]") {
+
+							return `RFC822.HEADER ()`;
+
+						}
+
+					}
 					
-					this.send("*", email.sequenceNumber + "", `FETCH (FLAGS (${(await db.emails.isSeen(this.user._id, email._id)) ? "\\Seen" : ""}) UID ${email.uid})`);
+					this.send("*", email.sequenceNumber + "", `FETCH (${maps})`);
 
 				}
 
@@ -209,6 +237,7 @@ module.exports = class IMAPConnection {
 
 	send (tag, command, args) {
 
+		console.log(`Server: ${tag} ${command}`, args);
 		const message = `${tag ? tag : "*"} ${command.toUpperCase()} ${args}`
 		this.socket.write(`${message}\r\n`);
 
