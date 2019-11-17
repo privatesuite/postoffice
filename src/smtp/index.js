@@ -114,7 +114,7 @@ class PostOfficeSMTP {
 
 						remoteAddress: session.remoteAddress,
 						clientHostname: session.clientHostname,
-						received: new Date()
+						received: parsedMessage.date
 	
 					});
 					await _this.sendEmail({

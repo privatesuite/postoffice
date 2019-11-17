@@ -224,7 +224,7 @@ module.exports = class IMAPConnection {
 					}
 					
 					console.log(args[2].map(__ => _(__)))
-					this.send("*", email.sequenceNumber + "", `FETCH (${(args[2].map(__ => _(__))).join(" ")})`);
+					this.send("*", email.sequenceNumber + "", `FETCH (${(args[2].map(__ => _(__))).join(" ")} UID ${email.uid})`);
 
 				}
 
