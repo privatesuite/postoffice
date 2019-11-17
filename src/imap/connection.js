@@ -223,7 +223,7 @@ module.exports = class IMAPConnection {
 
 					}
 					
-					this.send("*", email.sequenceNumber + "", `FETCH (${(args[2].map(__ => _(__) + " ")).trim()})`);
+					this.send("*", email.sequenceNumber + "", `FETCH (${(args[2].map(__ => _(__))).join(" ")})`);
 
 				}
 
