@@ -94,11 +94,13 @@ module.exports = class IMAPConnection {
 
 		} else if (command === "login") {
 
+			args[0] = args[0].replace(`@${this.server.options.server.host}`, "");
+			
 			const login = db.users.login(args[0], args[1]);
 			if (login) {
 
 				this.send(tag, "ok", "Logged in.");
-				this.user = await db.users.getUserByUsername(args[0].replace(`@${this.server.options.server.host}`, ""));
+				this.user = await db.users.getUserByUsername(args[0]);
 
 			} else {
 
