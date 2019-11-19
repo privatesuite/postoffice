@@ -95,7 +95,7 @@ module.exports = class IMAPConnection {
 		} else if (command === "login") {
 
 			args[0] = args[0].replace(`@${this.server.options.server.host}`, "");
-			
+			console.log(args[0]);
 			const login = db.users.login(args[0], args[1]);
 			if (login) {
 
