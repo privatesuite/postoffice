@@ -24,7 +24,7 @@ function (db) {
 			let a = 1;
 			if (this.getUidCounter()) a = parseInt(this.getUidCounter().value) + 1;
 
-			return a;
+			return (a + "").padStart(32, "0");
 
 		},
 

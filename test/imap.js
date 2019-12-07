@@ -19,6 +19,6 @@ client.connect().then(async () => {
 
 	console.log(await client.listMailboxes());
 	console.log(await client.selectMailbox("INBOX"));
-	console.log(await client.listMessages('INBOX', '1:10', ['uid', 'flags', 'body[]']));
+	console.log(await client.listMessages('INBOX', '1:10', ['uid', 'flags', 'BODY[HEADER.FIELDS (date subject from content-type to cc bcc)]']));
 
 });

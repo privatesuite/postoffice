@@ -81,7 +81,7 @@ module.exports = class IMAPConnection {
 		const command = (line[1] || "").toLowerCase();
 		const args = line.slice(2);
 
-		console.log(`Client: ${tag} ${command}`, args);
+		// console.log(`Client: ${tag} ${command}`, args);
 
 		if (command === "starttls") {
 
@@ -95,7 +95,6 @@ module.exports = class IMAPConnection {
 		} else if (command === "login") {
 
 			args[0] = args[0].replace(`@${this.server.options.server.host}`, "");
-			console.log(args[0]);
 			const login = db.users.login(args[0], args[1]);
 			if (login) {
 
@@ -189,50 +188,55 @@ module.exports = class IMAPConnection {
 				this.send("*", "ok", `[UIDVALIDITY ${imapUtils.generateUID(mailbox._id)}] UIDs valid.`);
 				this.send("*", "ok", `[UIDNEXT ${db.emails.nextUid()}] Next UID is ${db.emails.nextUid()}.`);
 				this.send("*", "flags", "(\\Answered \\Flagged \\Deleted \\Seen)");
-				this.send(tag, "ok", `[READ-ONLY] SELECT completed.`);
+				this.send(tag, "ok", `[READ-ONLY] EXAMINE completed.`);
 
 			} else this.send(tag, "no", "Error: Mailbox does not exist.");
 
-		} else if (command === "uid") {
+		} else if (command === "fetch" || (command === "uid" && args[0].toLowerCase() === "fetch")) {
 
-			if (args[0] === "fetch") {
+			if (args[0].toLowerCase() === "fetch") args.shift();
 
-				const emails = imapUtils.sliceFromUID(await db.emails.getEmailsInMailbox(this.selectedMailbox._id), args[1]);
+			const emails = command === "uid" ? imapUtils.sliceFromUID(await db.emails.getEmailsInMailbox(this.selectedMailbox._id), args[0]) : imapUtils.sliceFromUID(await db.emails.getEmailsInMailbox(this.selectedMailbox._id), args[0]);
+			console.log(emails, args[0]);
 
-				for (const email of emails) {
-
-					const _ = type => {
-
-						type = type.toLowerCase();
-
-						if (type === "uid") {
-
-							return `UID ${email.uid}`;
-
-						} else if (type === "flags") {
-
-							return `FLAGS (${(db.emails.isSeen(this.user._id, email._id)) ? "\\Seen" : ""})`;
-
-						} else if (type === "rfc822.size") {
-
-							return `RFC822.SIZE ${fs.statSync(email.emailPath).size}`;
-
-						} else if (type === "rfc822.header" || type === "body.peek[header]") {
-
-							return `RFC822.HEADER ()`;
-
-						}
-
+			for (const email of emails) {
+				
+				const _ = piece => {
+					
+					console.log(piece);
+					let type = (piece.value || piece).toLowerCase();
+					console.log("Type", type);
+					
+					if (type === "uid") {
+						
+						return `UID ${email.uid}`;
+						
+					} else if (type === "flags") {
+						
+						return `FLAGS (${(db.emails.isSeen(this.user._id, email._id)) ? "\\Seen" : ""})`;
+						
+					} else if (type === "rfc822.size") {
+						
+						return `RFC822.SIZE ${fs.statSync(email.emailPath).size}`;
+						
+					} else if (type === "body" || type === "body.peek") {
+						
+						console.log(piece.params);
+						return `${type.toUpperCase()} ()`;
+						
+					} else {
+						
+						console.log(type)
+						
 					}
 					
-					console.log(args[2].map(__ => _(__)))
-					this.send("*", email.sequenceNumber + "", `FETCH (${(args[2].map(__ => _(__))).join(" ")} UID ${email.uid})`);
-
 				}
-
-				this.send(tag, "ok", "UID FETCH completed.");
-
+				
+				this.send("*", email.sequenceNumber + "", `FETCH (${(args[1].map(__ => _(__))).join(" ")})`);
+				
 			}
+
+			this.send(tag, "ok", "FETCH completed.");
 
 		}
 

@@ -101,7 +101,8 @@ class PostOfficeSMTP {
 				if (session.envelope.mailFrom.address.endsWith(`@${options.server.host}`) && !session.user) return callback(new Error("Authentication required"));
 				if (session.user && `${session.user}@${options.server.host}` !== session.envelope.mailFrom.address) return callback(new Error("Invalid sender"));
 
-				const emailPath = path.join(__dirname, "..", "..", "mail", `${Math.random().toString(36).replace("0.", "")}.eml`);
+				const sp = `${Math.random().toString(36).replace("0.", "")}.eml`;
+				const emailPath = path.join(__dirname, "..", "..", "mail", sp);
 
 				console.log(`(smtp/info) Received email from "${session.envelope.mailFrom.address}" - storing...`);
 
@@ -110,7 +111,7 @@ class PostOfficeSMTP {
 					console.log(`(smtp/info) Successfully stored email from "${session.envelope.mailFrom.address}"!`);
 
 					const parsedMessage = await mailparser.simpleParser(fs.createReadStream(emailPath));
-					db.emails.createEmail(session.envelope, parsedMessage.messageId, emailPath, db.emails.getMailboxesFromEnvelope(session.envelope), {
+					db.emails.createEmail(session.envelope, parsedMessage.messageId, sp, db.emails.getMailboxesFromEnvelope(session.envelope), {
 
 						remoteAddress: session.remoteAddress,
 						clientHostname: session.clientHostname,

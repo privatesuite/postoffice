@@ -22,7 +22,7 @@ module.exports = {
 		const a = pattern.split(":")[0];
 		const b = pattern.split(":")[1];
 
-		return arr.filter(_ => parseInt(_.uid) >= a && parseInt(_.uid) <= (b === "*" ? (parseInt(_.uid) + 100) : b));
+		return arr.filter(_ => parseInt(_.uid) >= a && parseInt(_.uid) <= (b === "*" ? (parseInt(_.uid) + 10000000000000000) : b));
 
 	},
 
